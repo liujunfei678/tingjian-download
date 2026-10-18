@@ -1,0 +1,15 @@
+node_modules/
+.test-browsers/
+.test-profile/
+.test-install/
+test-results/
+dist/
+
+
+.superpowers/
+
+# Local credentials and machine-specific diagnostics
+.env
+.env.*
+!.env.example
+*.log

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>听见 · 音频下载助手</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" type="module"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><img src="../icons/icon48.png" width="38" height="38" alt=""><div><h1>听见<span>音频下载助手</span></h1><p>让网页里的声音，留在你的设备。</p></div></div>
+    <div class="live"><span></span>持续识别中</div>
+  </header>
+  <main>
+    <section class="page-info"><span class="eyebrow">当前页面</span><p id="page-title" title="">正在读取…</p><span id="page-host"></span></section>
+    <div class="summary"><div><strong id="count">0</strong><span>个音频链接</span></div><button id="scan" class="button subtle" title="重新检查页面和已加载的资源">重新扫描</button></div>
+    <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索名称、格式或来源" aria-label="搜索音频"></label><button id="clear" class="text-button">清空</button></div>
+    <div class="selectbar" id="selectbar" hidden><label><input id="select-all" type="checkbox"> 全选当前结果</label><span id="selected-count">已选 0 个</span></div>
+    <section id="audio-list" class="audio-list" aria-label="音频列表"></section>
+    <section id="empty" class="empty"><div class="empty-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><h2 id="empty-title">还没有发现音频</h2><p id="empty-description">试着播放页面里的音频。<br>新的音频链接会自动出现在这里。</p></section>
+    <p id="limit" class="limit" hidden>本页最多保留 200 个链接。可清空列表后继续识别。</p>
+    <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+  </main>
+  <footer><div class="download-row"><button id="download-selected" class="button primary" disabled>下载所选音频</button><label class="save-option"><input id="save-as" type="checkbox"> 每次选择位置</label></div><p>文件由浏览器保存至下载目录 · <button id="open-downloads" class="text-button">查看下载</button></p></footer>
+  <template id="audio-template"><article class="audio-card"><input class="item-select" type="checkbox" aria-label="选择音频"><div class="audio-details"><div class="card-top"><span class="format"></span><span class="file-size"></span><span class="source"></span></div><h2 class="file-name"></h2><p class="file-host"></p><p class="download-state" hidden></p><div class="card-actions"><button class="copy-button text-button">复制链接</button><button class="download-button button small">下载</button></div></div></article></template>
+</body>
+</html>

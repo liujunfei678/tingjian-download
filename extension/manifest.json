@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "听见 · 音频下载助手",
+  "version": "2.0.5",
+  "description": "常驻侧栏发现网页音频，按名称分组下载，并在本地批量将 M4A 转为 MP3。",
+  "minimum_chrome_version": "120",
+  "permissions": [
+    "webRequest",
+    "downloads",
+    "storage",
+    "scripting",
+    "nativeMessaging",
+    "sidePanel",
+    "downloads.open"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "听见 · 查看可下载音频",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "lib/audio.js",
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgxXcx0VRjayn2FczFFQtIrl2jfTgvEpzYRxTuKfc7Vs7BFte3cPrcmyQCcqTTxMjNLnMyesysbvl+3skW/jLDANwDrvm4jpYUjorDdafhnsAUHDMn08h5hbgw04jHnE2bML7G0tDcS3HqhR8l5G0zraMrh9N7x8sNgcUFe3aLZ1ivZKdff+Nu8fyEmZFDuW6A07v97fEWHyBxOK66vlEssyM0NJXSrrT2V6ub/+vBVnVnI7p+9H8dEcNlPvOM7cPR+PJOW6AbV74vnA+FQpl3uGj3Q6b3V+htcRwI0STlw6XkTt2EbjEOetlCEzPDgcB4nRKMQHuHe0eSieFLiMMpQIDAQAB",
+  "side_panel": {
+    "default_path": "panel/panel.html"
+  }
+}

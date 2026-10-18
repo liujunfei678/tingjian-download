@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>听见 · 音频工作台</title>
+  <link rel="stylesheet" href="panel.css">
+  <script src="panel.js" type="module"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand"><img src="../icons/icon48.png" width="40" height="40" alt=""><h1>听见</h1><span>音频工作台</span></div>
+    <button id="close-panel" class="icon-button close-button" aria-label="关闭听见" title="关闭侧栏；正在执行的任务会继续"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </header>
+  <nav class="tabs" aria-label="工作台">
+    <button id="nav-resources" class="tab active" aria-current="page" data-view="resources">资源</button>
+    <button id="nav-conversion" class="tab" data-view="conversion">格式转换<span id="conversion-badge" class="nav-count" hidden></span></button>
+    <button id="nav-settings" class="tab" data-view="settings">设置</button>
+  </nav>
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden><span id="notice-text"></span><button id="dismiss-notice" class="icon-button" aria-label="关闭提示">×</button></div>
+  <main>
+    <section id="view-resources" class="view active" aria-labelledby="nav-resources">
+      <div class="view-scroll" id="resource-scroll">
+        <div class="page-info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg><div><span id="page-host">正在读取网页…</span><p id="page-title">当前页面</p></div><span class="live-dot" title="侧栏会跟随当前窗口的活动网页"></span></div>
+        <div class="section-heading"><h2>网页里的声音</h2><strong id="count">0</strong></div>
+        <p class="description">播放音频，听见会自动收集。</p>
+        <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="搜索名称或链接" aria-label="搜索音频"></label>
+        <div id="selectbar" class="selection-bar"><label><input id="select-all" type="checkbox">全选</label><span id="selected-count">已选 0 个</span><button id="scan" class="text-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M20 12a8 8 0 1 0-2.4 5.7M20 7l-3-3"/></svg><span>重新扫描</span></button></div>
+        <div id="audio-list" aria-label="音频列表">
+          <section class="resource-group" data-group="recognized"><div class="group-heading"><button class="group-toggle" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg><h3>已识别</h3><span class="group-count">0</span></button><label class="group-select-label" title="选择本组的搜索结果"><input class="group-select" type="checkbox" aria-label="选择已识别组">本组全选</label></div><div class="group-items"></div></section>
+          <section class="resource-group" data-group="unrecognized"><div class="group-heading"><button class="group-toggle" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg><h3>未识别</h3><span class="group-count">0</span></button><label class="group-select-label" title="选择本组的搜索结果"><input class="group-select" type="checkbox" aria-label="选择未识别组">本组全选</label></div><div class="group-items"></div></section>
+        </div>
+        <section id="empty" class="empty"><div class="empty-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><h3 id="empty-title">还没有发现音频</h3><p id="empty-description">试着播放页面里的音频。<br>新的链接会自动出现在这里。</p></section>
+        <p id="limit" class="hint" hidden>本页最多保留 200 个链接，可清空列表后继续识别。</p>
+        <div class="list-tools"><span id="group-explanation">已识别指有可用名称，不代表歌曲身份验证。</span><button id="clear" class="text-button" disabled>清空列表</button></div>
+        <section id="download-tasks" class="download-tasks" hidden><div class="subheading"><h3>下载任务</h3><button class="text-button open-downloads">浏览器记录 ↗</button></div><div id="download-task-list"></div></section>
+      </div>
+      <footer class="view-footer"><div class="save-target"><span>保存到</span><button id="save-target" class="text-button truncate" title="浏览器默认目录">浏览器默认目录</button><button id="change-save-target" class="text-button">更改</button></div><button id="download-selected" class="button primary full" disabled>下载所选音频</button><p class="footer-note">本机处理，安心保存。</p></footer>
+    </section>
+    <section id="view-conversion" class="view" aria-labelledby="nav-conversion" hidden>
+      <div class="view-scroll">
+        <button id="conversion-host" class="host-banner" title="查看本地组件设置"><span class="status-dot"></span><span id="conversion-host-text">本地组件尚未配置</span><span class="banner-arrow">›</span></button>
+        <h2>转成 MP3</h2><p class="description">原文件保留，转换在本机完成。</p>
+        <div class="add-actions"><button id="add-files" class="button primary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4ZM14 3v5h5M9 13h6M12 10v6"/></svg>添加 M4A 文件</button><button id="add-folder" class="button outline"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4h7l2 3h9v13H3V7ZM3 10h18"/></svg>添加文件夹</button></div>
+        <label class="check-label recursive"><input id="recursive" type="checkbox">包含子目录</label>
+        <div class="conversion-options"><label>码率<select id="bitrate"><option value="128">128 kbps</option><option value="192">192 kbps</option><option value="256">256 kbps</option><option value="320" selected>320 kbps</option></select></label><div><label>输出目录</label><div class="directory-inline"><span id="conversion-directory" class="truncate" title="跟随下载目录">跟随下载目录</span><button id="choose-conversion-directory" class="text-button">更改</button></div></div></div>
+        <div class="subheading queue-heading"><h3>转换队列</h3><span id="queue-count">0</span></div>
+        <div id="conversion-list" aria-label="转换队列"></div><div id="conversion-empty" class="empty compact"><div class="empty-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><h3>把声音换个格式</h3><p>添加本地 M4A，或在资源中选择<br>“下载并转 MP3”。</p></div>
+      </div>
+      <footer class="view-footer"><div class="queue-summary"><span id="queue-summary">已完成 0 / 0</span><span id="queue-progress-text"></span></div><progress id="queue-progress" max="1" value="0" aria-label="转换总进度"></progress><div class="footer-actions"><button id="start-conversion" class="button primary" disabled>开始转换</button><button id="cancel-conversion" class="button outline" disabled>停止</button></div></footer>
+    </section>
+    <section id="view-settings" class="view" aria-labelledby="nav-settings" hidden>
+      <div class="view-scroll settings-scroll">
+        <h2>按你的方式保存</h2><p class="description">自定义保存位置和转换偏好。</p>
+        <section class="settings-section"><h3>保存位置</h3><label class="radio-label"><input type="radio" name="download-mode" id="mode-browser" value="browser" checked>浏览器默认目录</label><label class="radio-label"><input type="radio" name="download-mode" id="mode-custom" value="custom">自定义文件夹</label><div class="directory-picker"><span id="download-directory" class="directory-value" title="尚未选择">尚未选择</span><button id="choose-download-directory" class="button outline">选择文件夹</button></div><label class="check-label save-as-label"><input id="save-as" type="checkbox"><span>下载前询问保存位置<small>仅在使用浏览器默认目录时生效。</small></span></label></section>
+        <section class="settings-section"><h3>转换偏好</h3><label class="settings-row">MP3 码率<select id="settings-bitrate"><option value="128">128 kbps</option><option value="192">192 kbps</option><option value="256">256 kbps</option><option value="320" selected>320 kbps</option></select></label><div class="settings-row"><span>输出文件夹</span><button id="settings-conversion-directory" class="text-button truncate" title="跟随下载目录">跟随下载目录</button></div><button id="follow-download-directory" class="text-button reset-directory" hidden>恢复为跟随下载目录</button><p class="hint">输出为 44.1 kHz、双声道 MP3，原始文件保留。</p></section>
+        <section class="settings-section"><div class="subheading"><h3>本地组件</h3><span id="host-status" class="host-status"><span class="status-dot"></span>尚未配置</span></div><p class="description small">用于自定义文件夹和 M4A 转换，文件只在本机处理。</p><p id="host-error" class="inline-error" hidden></p><div class="host-actions"><button id="native-connect" class="button primary">连接本地组件</button><button id="setup-help-toggle" class="text-button" aria-expanded="false">配置说明</button></div><div id="setup-help" class="setup-help" hidden><h4>首次配置一次，以后随时使用</h4><ol><li>解压随听见提供的 Windows 本地组件包。</li><li>关闭正在运行的转换任务，运行 Tingjian.Setup.exe，为当前浏览器配置。</li><li>回到这里，点击“连接本地组件”。</li></ol><p>支持 Windows 10 / 11 的 Chrome 与 Edge。无需修改浏览器下载目录。需要移除配置时，运行 Tingjian.Uninstall.exe。</p></div></section>
+        <section class="settings-section downloads-setting"><div><h3>浏览器下载记录</h3><p class="hint">查看浏览器保存的原始下载文件。</p></div><button id="open-downloads" class="button outline open-downloads">打开下载记录</button></section>
+        <p class="version">听见 2.0.2</p>
+      </div>
+    </section>
+  </main>
+  <template id="audio-template"><article class="audio-card"><input class="item-select" type="checkbox"><div class="file-icon"><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M14 2H3v24h18V9l-7-7ZM14 2v7h7M14 12v8M14 13l-5 1v7M14 19c-3-1-4 3-1 3s3-3 1-3ZM9 20c-3-1-4 3-1 3s3-3 1-3Z"/></svg></div><div class="audio-details"><div class="file-top"><h4 class="file-name"></h4><span class="format"></span></div><p class="file-meta"><span class="file-host"></span><span class="file-size"></span></p><p class="provenance"><span class="source"></span><span class="name-pending" hidden>名称待确认</span></p><p class="download-state" hidden></p></div><div class="card-actions"><button class="download-button icon-button" title="下载" aria-label="下载"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg></button><button class="copy-button icon-button" title="复制链接" aria-label="复制链接"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 8V3H3v13h5"/></svg></button></div><button class="convert-button text-button" hidden>下载并转 MP3</button></article></template>
+</body>
+</html>

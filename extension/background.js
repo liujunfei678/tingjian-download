@@ -4,6 +4,7 @@ import { Workbench } from './lib/workbench.js';
 import { isTrustedUI } from './lib/access.js';
 import { isNeteasePageURL, matchingNeteasePlaybackURL, needsNeteaseM4APlaybackProof, readNeteasePlayback } from './lib/netease.js';
 import { NeteaseDiagnostics, summarizeNeteaseURL } from './lib/netease-diagnostics.js';
+import { musicSiteForURL, readMusicSitePlayback } from './lib/music-sites.js';
 
 const workbench = new Workbench(chrome, new NativeBridge(chrome.runtime));
 const neteaseDiagnostics = new NeteaseDiagnostics(chrome);
@@ -12,6 +13,8 @@ void workbench.ready.then(() => workbench.recover()).catch(console.error);
 const queues = new Map();
 const navigationRequests = new Map();
 const namingRequests = new Map();
+const siteNamingRequests = new Map();
+const namingEpochs = new Map();
 const diagnosticResponses = new Map();
 const pendingNeteaseResponses = new Map();
 const MAX_ITEMS = 200;
@@ -38,6 +41,48 @@ async function setBadge(tabId, count) {
     chrome.action.setBadgeBackgroundColor({ tabId, color: "#116D60" }),
     chrome.action.setTitle({ tabId, title: count ? `听见 · 发现 ${count} 个音频链接` : "听见 · 查看可下载音频" })
   ]);
+}
+
+function enrichMusicNames(tabId, trigger = 'refresh') {
+  if (siteNamingRequests.has(tabId)) return siteNamingRequests.get(tabId);
+  const generation = navigationRequests.get(tabId);
+  const epoch = namingEpochs.get(tabId);
+  const request = (async () => {
+    const tab = await chrome.tabs.get(tabId);
+    if (isNeteasePageURL(tab.url)) return enrichNeteaseNames(tabId, trigger);
+    const site = musicSiteForURL(tab.url);
+    if (!site) return;
+    const results = await chrome.scripting.executeScript({
+      target: { tabId, frameIds: [0] }, world: 'MAIN', func: readMusicSitePlayback
+    });
+    const bindings = results.flatMap(result => Array.isArray(result.result) ? result.result : []).slice(0,8);
+    await serialize(tabId, async () => {
+      const stale = () => generation !== navigationRequests.get(tabId) || epoch !== namingEpochs.get(tabId);
+      if (stale()) return;
+      const currentTab = await chrome.tabs.get(tabId);
+      if (musicSiteForURL(currentTab.url) !== site || stale()) return;
+      const state = await readState(tabId);
+      if (stale()) return;
+      let changed = false;
+      state.items = state.items.map(item => {
+        const binding = bindings.find(value => value?.site === site && matchingNeteasePlaybackURL(item.url,value.url));
+        if (!binding?.trackId || !binding.title) return item;
+        if (item.musicTrackId && (item.musicTrackId !== binding.trackId || item.musicSite !== site)) return item;
+        // Name already captured resources only. Preserve the signed URL,
+        // download verification, HTTP rejection rules and resource count.
+        const named = AudioTools.candidate({...item,title:binding.title,artist:binding.artist,
+          titleSource:'media',source:'page',verified:false});
+        if (!named?.title) return item;
+        const next = {...AudioTools.merge(item,named),musicSite:site,musicTrackId:binding.trackId};
+        if (['filename','title','artist','titleSource','nameRecognized','musicSite','musicTrackId'].some(key=>next[key]!==item[key])) changed = true;
+        return next;
+      });
+      if (changed) await chrome.storage.session.set({[keyFor(tabId)]:state});
+    });
+  })().catch(() => { /* Unavailable or changed players leave the original resource usable. */ });
+  siteNamingRequests.set(tabId,request);
+  void request.finally(() => {if(siteNamingRequests.get(tabId)===request) siteNamingRequests.delete(tabId);});
+  return request;
 }
 
 function enrichNeteaseNames(tabId, trigger = 'refresh') {
@@ -225,6 +270,7 @@ function rejectResponse(tabId, rawURL) {
 }
 
 function clearTab(tabId) {
+  namingEpochs.set(tabId, (namingEpochs.get(tabId) || 0) + 1);
   pendingNeteaseResponses.delete(tabId);
   return serialize(tabId, async () => {
     const stored = await chrome.storage.session.get(null);
@@ -264,7 +310,7 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
     verified: true
   };
   if (AudioTools.isAudioURL(item.url, item.mime, AudioTools.dispositionFilename(item.disposition))) {
-    void recordItems(details.tabId, [item], undefined, true).then(() => enrichNeteaseNames(details.tabId, 'captured-response')).catch(console.error);
+    void recordItems(details.tabId, [item], undefined, true).then(() => enrichMusicNames(details.tabId, 'captured-response')).catch(console.error);
   } else if (needsNeteaseM4APlaybackProof(item.url, item.mime)) {
     awaitNeteaseM4AProof(details.tabId, item);
   } else if (item.mime && (details.type === "media" || AudioTools.isAudioURL(item.url))) {
@@ -276,6 +322,7 @@ chrome.tabs.onRemoved.addListener(tabId => {
   navigationRequests.delete(tabId);
   pendingNeteaseResponses.delete(tabId);
   void clearTab(tabId).catch(console.error);
+  namingEpochs.delete(tabId);
 });
 
 async function scanTab(tabId) {
@@ -287,13 +334,13 @@ async function scanTab(tabId) {
     await chrome.tabs.sendMessage(tabId, { type: "SCAN_AUDIO" });
   }
   if (queues.has(tabId)) await queues.get(tabId);
-  await enrichNeteaseNames(tabId, 'scan');
+  await enrichMusicNames(tabId, 'scan');
   return readState(tabId);
 }
 
 async function downloadItems(tabId, urls, saveAs) {
   if (queues.has(tabId)) await queues.get(tabId);
-  await enrichNeteaseNames(tabId, 'download');
+  await enrichMusicNames(tabId, 'download');
   const state = await readState(tabId);
   const requested = new Set(urls);
   const items = state.items.filter(item => requested.has(item.url));
@@ -310,7 +357,7 @@ async function handleMessage(message, sender) {
   if (message.type === "REPORT_AUDIO") {
     if (!sender.tab || !Array.isArray(message.items)) throw new Error("无效的页面报告。");
     await recordItems(sender.tab.id, message.items, sender.url);
-    await enrichNeteaseNames(sender.tab.id, 'page-report');
+    await enrichMusicNames(sender.tab.id, 'page-report');
     return { ok: true };
   }
   // Downloads and tab actions can only be requested from our own extension UI.
@@ -326,7 +373,7 @@ async function handleMessage(message, sender) {
   switch (message.type) {
     case "GET_AUDIO":
       if (queues.has(message.tabId)) await queues.get(message.tabId);
-      await enrichNeteaseNames(message.tabId);
+      await enrichMusicNames(message.tabId);
       return readState(message.tabId);
     case "SCAN_TAB": return scanTab(message.tabId);
     case "CLEAR_TAB": await clearTab(message.tabId); return emptyState();

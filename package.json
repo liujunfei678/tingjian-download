@@ -1,11 +1,11 @@
 {
   "name": "tingjian-audio-downloader",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "test:e2e": "node tests/browser.mjs && node tests/legacy-v1.1.browser.mjs && node tests/netease.browser.mjs && node tests/panel.browser.mjs && node tests/sidepanel.browser.mjs && node tests/workbench.integration.mjs",
+    "test:e2e": "node tests/browser.mjs && node tests/legacy-v1.1.browser.mjs && node tests/netease.browser.mjs && node tests/music-sites.browser.mjs && node tests/panel.browser.mjs && node tests/sidepanel.browser.mjs && node tests/workbench.integration.mjs",
     "demo": "node scripts/demo-server.mjs",
     "icons": "node scripts/make-icons.mjs",
     "package": "node scripts/package.mjs",

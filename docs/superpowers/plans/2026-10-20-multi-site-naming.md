@@ -29,23 +29,23 @@
 Files: `extension/lib/music-sites.js`, `tests/music-sites.test.mjs`。
 Interface: `musicSiteForURL(value)` 返回站点代号；`readMusicSitePlayback()` 可独立序列化，返回 `{site,trackId,url,title,artist}[]`。
 
-- [ ] 写入各站有效关联、ID 冲突、切歌、getter、边界和来源校验测试。
-- [ ] 运行 `node --test tests/music-sites.test.mjs`，确认因尚无读取器失败。
-- [ ] 根据官网当前播放器代码实现只读读取器，运行相同测试确认通过。
+- [x] 写入各站有效关联、ID 冲突、切歌、getter、边界和来源校验测试。
+- [x] 运行 `node --test tests/music-sites.test.mjs`，确认因尚无读取器失败。
+- [x] 根据官网当前播放器代码实现只读读取器，运行相同测试确认通过。
 
 ### Task 2: 后台关联与 Edge 验证
 
 Files: `extension/background.js`, `tests/music-sites.browser.mjs`。
 Consumes Task 1 exports; existing NetEase reader remains separate.
 
-- [ ] 写 Edge 夹具覆盖三站、精确签名、重复请求、迟到名称、歌曲切换、失败响应、真实下载名称。
-- [ ] 确认接入前测试失败；加入通用分派入口，只改已有资源的名称。
-- [ ] 运行新浏览器测试和 `tests/netease.browser.mjs`、1.1 回归、单元测试。
+- [x] 写 Edge 夹具覆盖三站、精确签名、重复请求、迟到名称、歌曲切换、失败响应、真实下载名称。
+- [x] 确认接入前测试失败；加入通用分派入口，只改已有资源的名称。
+- [x] 运行新浏览器测试和 `tests/netease.browser.mjs`、1.1 回归、单元测试。
 
 ### Task 3: 文档与交付
 
 Files: `README.md`, `package.json`, `extension/manifest.json`。
 
-- [ ] 记录支持范围和真实网站验证限制，版本更新为 2.1.0。
-- [ ] 打包并校验包内文件，更新用户实际加载的固定扩展目录。
-- [ ] 审查最终 diff，保留本地提交与检查证据；不自动发布远程。
+- [x] 记录支持范围和真实网站验证限制，版本更新为 2.1.0。
+- [x] 打包并校验包内文件，更新用户实际加载的固定扩展目录。
+- [x] 审查最终 diff，保留本地提交与检查证据；不自动发布远程。

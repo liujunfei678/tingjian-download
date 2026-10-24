@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 // Deliberately read the entry point before launching: the test must fail while the new UI is absent.
 await readFile(path.join(root, 'extension/panel/panel.html'));
-const results = path.join(root, 'test-results/panel');
+const results = process.env.TINGJIAN_PANEL_TEST_RESULTS || path.join(root, 'test-results/panel');
 await mkdir(results, { recursive: true });
 const server = createServer(async (req, res) => {
   try {
@@ -159,9 +159,15 @@ try {
     await page.locator('#nav-resources').click();
     assert.equal(await page.locator('.audio-card[data-url$="away.mp3"] .download-state').textContent(), '下载中');
     await page.evaluate(() => { __mock.workbench.downloads[0].state = 'failed'; __mock.workbench.downloads[0].error = '测试保存失败'; __mock.update(); });
-    await page.locator('.retry-download').click();
-    assert.equal(await page.evaluate(() => __mock.calls.some(call => call.type === 'RETRY_DOWNLOAD' && call.id === 'new')), true);
+    assert.equal(await page.locator('.audio-card[data-url$="away.mp3"] .download-state').textContent(), '下载未完成：测试保存失败');
+    await page.locator('.audio-card[data-url$="away.mp3"] .download-button').click();
+    const download = await page.evaluate(() => __mock.calls.filter(call => call.type === 'DOWNLOAD_AUDIO').at(-1));
+    assert.deepEqual(download.urls, ['https://example.music/away.mp3']);
     await page.locator('#dismiss-notice').click();
+    await page.screenshot({ path: path.join(results, 'resources-no-download-tasks.png') });
+    await page.locator('#resource-scroll').evaluate(node => { node.scrollTop = node.scrollHeight; });
+    await page.screenshot({ path: path.join(results, 'resources-list-end.png') });
+    await page.locator('#resource-scroll').evaluate(node => { node.scrollTop = 0; });
   });
   await check('native reconnect cannot move a requested download to another tab', async () => {
     await page.evaluate(() => { __mock.workbench.host.connected = false; __mock.delays.native = 200; __mock.update(); });

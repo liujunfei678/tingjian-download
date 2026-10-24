@@ -33,7 +33,6 @@
         <section id="empty" class="empty"><div class="empty-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><h3 id="empty-title">还没有发现音频</h3><p id="empty-description">试着播放页面里的音频。<br>新的链接会自动出现在这里。</p></section>
         <p id="limit" class="hint" hidden>本页最多保留 200 个链接，可清空列表后继续识别。</p>
         <div class="list-tools"><span id="group-explanation">已识别指有可用名称，不代表歌曲身份验证。</span><button id="clear" class="text-button" disabled>清空列表</button></div>
-        <section id="download-tasks" class="download-tasks" hidden><div class="subheading"><h3>下载任务</h3><button class="text-button open-downloads">浏览器记录 ↗</button></div><div id="download-task-list"></div></section>
       </div>
       <footer class="view-footer"><div class="save-target"><span>保存到</span><button id="save-target" class="text-button truncate" title="浏览器默认目录">浏览器默认目录</button><button id="change-save-target" class="text-button">更改</button></div><button id="download-selected" class="button primary full" disabled>下载所选音频</button><p class="footer-note">本机处理，安心保存。</p></footer>
     </section>
@@ -56,7 +55,7 @@
         <section class="settings-section"><h3>转换偏好</h3><label class="settings-row">MP3 码率<select id="settings-bitrate"><option value="128">128 kbps</option><option value="192">192 kbps</option><option value="256">256 kbps</option><option value="320" selected>320 kbps</option></select></label><div class="settings-row"><span>输出文件夹</span><button id="settings-conversion-directory" class="text-button truncate" title="跟随下载目录">跟随下载目录</button></div><button id="follow-download-directory" class="text-button reset-directory" hidden>恢复为跟随下载目录</button><p class="hint">输出为 44.1 kHz、双声道 MP3，原始文件保留。</p></section>
         <section class="settings-section"><div class="subheading"><h3>本地组件</h3><span id="host-status" class="host-status"><span class="status-dot"></span>尚未配置</span></div><p class="description small">用于自定义文件夹和 M4A 转换，文件只在本机处理。</p><p id="host-error" class="inline-error" hidden></p><div class="host-actions"><button id="native-connect" class="button primary">连接本地组件</button><button id="setup-help-toggle" class="text-button" aria-expanded="false">配置说明</button></div><div id="setup-help" class="setup-help" hidden><h4>首次配置一次，以后随时使用</h4><ol><li>解压随听见提供的 Windows 本地组件包。</li><li>关闭正在运行的转换任务，运行 Tingjian.Setup.exe，为当前浏览器配置。</li><li>回到这里，点击“连接本地组件”。</li></ol><p>支持 Windows 10 / 11 的 Chrome 与 Edge。无需修改浏览器下载目录。需要移除配置时，运行 Tingjian.Uninstall.exe。</p></div></section>
         <section class="settings-section downloads-setting"><div><h3>浏览器下载记录</h3><p class="hint">查看浏览器保存的原始下载文件。</p></div><button id="open-downloads" class="button outline open-downloads">打开下载记录</button></section>
-        <p class="version">听见 2.0.2</p>
+        <p class="version">听见 2.1.1</p>
       </div>
     </section>
   </main>

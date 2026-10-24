@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "听见 · 音频下载助手",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "常驻侧栏发现网页音频，按名称分组下载，并在本地批量将 M4A 转为 MP3。",
   "minimum_chrome_version": "120",
   "permissions": [

@@ -165,9 +165,9 @@ function taskButton(label, className, action) {
   button.addEventListener('click', () => void perform(button, action));
   return button;
 }
-function taskNode(task, conversion) {
+function taskNode(task) {
   const node = document.createElement('article');
-  node.className = `task ${conversion ? 'conversion-task' : 'download-task'} ${task.state}`;
+  node.className = `task conversion-task ${task.state}`;
   node.dataset.id = task.id;
   const top = textElement('div', 'task-top', '');
   top.append(textElement('h4', 'task-name', task.name || task.filename || task.inputPath?.split(/[\\/]/).pop() || '音频任务'));
@@ -176,13 +176,13 @@ function taskNode(task, conversion) {
   if (activeStates.has(task.state)) {
     const bar = document.createElement('progress'); bar.max = 1; bar.value = task.progress || 0; bar.setAttribute('aria-label', '任务进度'); node.append(bar);
   }
-  const destination = task.outputPath || task.path || (conversion ? task.inputPath : '');
+  const destination = task.outputPath || task.path || task.inputPath;
   if (destination) node.append(textElement('p', 'task-meta', destination));
   if (task.error) node.append(textElement('p', 'task-error', task.error));
   const actions = textElement('div', 'task-actions', '');
-  if (retryStates.has(task.state)) actions.append(taskButton('重试', conversion ? 'retry-conversion' : 'retry-download', async () => {
-    if (conversion && !await hostRequired()) return;
-    await updateFromResponse(await request(conversion ? 'RETRY_CONVERSION' : 'RETRY_DOWNLOAD', { id: task.id }));
+  if (retryStates.has(task.state)) actions.append(taskButton('重试', 'retry-conversion', async () => {
+    if (!await hostRequired()) return;
+    await updateFromResponse(await request('RETRY_CONVERSION', { id: task.id }));
   }));
   if (task.state === 'complete') {
     actions.append(taskButton('打开', 'open-task', () => request('OPEN_TASK', { id: task.id, reveal: false })));
@@ -227,12 +227,9 @@ function renderWorkbench() {
   $('start-conversion').disabled = !pending || running || !connected;
   $('cancel-conversion').disabled = !running;
   $('conversion-empty').hidden = jobs.length > 0;
-  $('conversion-list').replaceChildren(...jobs.map(task => taskNode(task, true)));
+  $('conversion-list').replaceChildren(...jobs.map(task => taskNode(task)));
   const waitingCount = jobs.filter(task => ['pending', 'running'].includes(task.state)).length;
   $('conversion-badge').hidden = !waitingCount; setText('conversion-badge', waitingCount);
-  const downloads = workbench.downloads;
-  $('download-tasks').hidden = !downloads.length;
-  $('download-task-list').replaceChildren(...downloads.map(task => taskNode(task, false)));
   renderResources();
 }
 function acceptWorkbench(snapshot) {
